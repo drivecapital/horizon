@@ -1,0 +1,9 @@
+{
+	"apps": [{
+		"name": "hacknight",
+		"script": "/usr/bin/hz",
+		"args": "serve /home/horizon/hacknight --dev",
+		"watch": false,
+		"autorestart": true
+	}]
+}
