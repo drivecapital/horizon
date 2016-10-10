@@ -1,0 +1,4 @@
+.vagrant/
+auth.yml
+inventory
+playbook.retry

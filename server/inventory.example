@@ -1,0 +1,3 @@
+# Copy this file to `inventory` and substitute your server's IP address and SSH
+# port below.
+localhost:8022
