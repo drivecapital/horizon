@@ -10,6 +10,7 @@
   vars:
     packages:
       - fail2ban
+      - git
       - htop
       - nginx
       - nodejs
@@ -122,12 +123,22 @@
         state: absent
       notify: Restart Nginx
 
-    # Set up Horizon
+    # Install Horizon
     - name: Create horizon user
       user:
         name: horizon
         shell: /usr/sbin/nologin
+    - name: Check out the Horizon repository
+      git:
+        repo: https://github.com/btmills/horizon.git
+        dest: /home/horizon/horizon
+    - name: Install Horizon
+      command: npm link
+      args:
+        chdir: /home/horizon/horizon/cli
+        creates: /usr/bin/hz
 
+    # Set up Hacknight app
     - name: Copy scripts
       synchronize:
         dest: /home/horizon
@@ -145,12 +156,8 @@
       synchronize:
         dest: /home/horizon/
         src: hacknight
-    - name: Install horizon from npm
-      npm:
-        global: yes
-        name: horizon
     - name: Apply horizon schema
-      command: hz schema apply .hz/schema.toml
+      command: hz schema apply --rdb-password {{ admin_password }} .hz/schema.toml
       args:
         chdir: /home/horizon/hacknight
     - name: Install pm2 from npm
