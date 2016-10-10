@@ -1,0 +1,58 @@
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+html {
+	box-sizing: border-box;
+	font-family: sans-serif;
+	font-size: 16px;
+}
+
+html, body, #app {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+
+.App {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.Messages {
+	align-items: flex-start;
+	background: #eee;
+	display: flex;
+	flex: 1;
+	flex-direction: column-reverse;
+	justify-content: flex-start;
+	list-style-type: none;
+	margin: 0;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	padding: 6px;
+}
+
+.Message {
+	background: #fff;
+	margin-top: 6px;
+	max-width: 80%;
+	padding: 6px;
+}
+
+.Message-avatar {
+	float: left;
+	margin: -6px 6px 6px -6px;
+}
+
+.Message-text { }
+
+.Input-text {
+	border: none;
+	font-size: 20px;
+	outline: none;
+	padding: 20px;
+	width: 100%;
+}
