@@ -130,8 +130,9 @@
         shell: /usr/sbin/nologin
     - name: Check out the Horizon repository
       git:
-        repo: https://github.com/btmills/horizon.git
         dest: /home/horizon/horizon
+        repo: https://github.com/btmills/horizon.git
+        version: 5b91bf2d5db812f99841784d69f721573b52408e
     - name: Install Horizon
       command: npm link
       args:
