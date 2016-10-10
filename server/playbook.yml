@@ -127,6 +127,20 @@
       user:
         name: horizon
         shell: /usr/sbin/nologin
+
+    - name: Copy scripts
+      synchronize:
+        dest: /home/horizon
+        rsync_opts: --exclude 'node_modules'
+        src: scripts
+    - name: Install script dependencies
+      npm:
+        path: /home/horizon/scripts
+    - name: Set RethinkDB admin password
+      command: node set-admin-password.js {{ admin_password }}
+      args:
+        chdir: /home/horizon/scripts
+
     - name: Copy source files
       synchronize:
         dest: /home/horizon/
