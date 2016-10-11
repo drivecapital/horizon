@@ -74,31 +74,31 @@ class App extends React.Component {
 	render() {
 		return (
 			<div className="App">
-				<Board categories={this.state.categories} onSelect={this.handleSelect} questionsById={this.state.questionsById} />
+				<Board
+					categories={this.state.categories}
+					onSelect={this.handleSelect}
+					questionsById={this.state.questionsById}
+				/>
 			</div>
 		);
 	}
 
 }
 
-const Board = ({ categories, onSelect, questionsById }) => (
+const Board = ({ categories, ...props }) => (
 	<table className="Board">
-		<Header categories={categories} />
-		<Cells categories={categories} onSelect={onSelect} questionsById={questionsById} />
+		<thead>
+			<tr>
+				{categories.map(({ name }) => (
+					<th key={name}>{name}</th>
+				))}
+			</tr>
+		</thead>
+		<Cells {...props} categories={categories} />
 	</table>
 );
 
-const Header = ({ categories }) => (
-	<thead>
-		<tr>
-			{categories.map(({ name }) => (
-				<th key={name}>{name}</th>
-			))}
-		</tr>
-	</thead>
-);
-
-const Cells = ({ categories, onSelect, questionsById }) => {
+const Cells = ({ categories, questionsById, ...props }) => {
 	// HTML tables are row-based, so transpose the column-based categories
 	const rows = [];
 	const height = Math.max(...categories.map(({ questions }) => questions.length));
@@ -111,7 +111,11 @@ const Cells = ({ categories, onSelect, questionsById }) => {
 			{rows.map((row, i) => (
 				<tr key={i}>
 					{row.map((qid) => (
-						<Cell key={qid} onSelect={onSelect} {...questionsById[qid]} />
+						<Cell
+							{...props}
+							{...questionsById[qid]}
+							key={qid}
+						/>
 					))}
 				</tr>
 			))}

@@ -9,10 +9,10 @@
 <body>
 	<div id="app"></div>
 	<script src="/horizon/horizon.js"></script>
-	<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+	<script src="https://unpkg.com/babel-standalone@6.17.0/babel.min.js"></script>
 	<script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
 	<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
 	<script src="auth.js"></script>
-	<script type="text/babel" data-presets="es2017,react" src="app.jsx"></script>
+	<script type="text/babel" data-plugins="transform-es2015-destructuring,transform-es2015-parameters,transform-object-rest-spread" data-presets="es2017,react" src="app.jsx"></script>
 </body>
 </html>
