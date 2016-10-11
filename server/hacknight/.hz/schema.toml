@@ -1,3 +1,17 @@
+[collections.messages]
+[[collections.messages.indexes]]
+fields = [["timestamp"]]
+
 [groups.admin]
 [groups.admin.rules.carte_blanche]
 template = "any()"
+
+[groups.authenticated]
+
+[groups.authenticated.rules.read_current_user]
+template = "collection('users').find({ id: userId() })"
+
+[groups.authenticated.rules.list_messages]
+template = "collection('messages')"
+[groups.authenticated.rules.store_messages]
+template = "collection('messages').store({ id: any(), text: any(), timestamp: any(), user: any() })"

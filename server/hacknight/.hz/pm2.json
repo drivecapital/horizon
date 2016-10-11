@@ -2,7 +2,7 @@
 	"apps": [{
 		"name": "hacknight",
 		"script": "/usr/bin/hz",
-		"args": "serve /home/horizon/hacknight --dev",
+		"args": "serve /home/horizon/hacknight --secure=no",
 		"watch": false,
 		"autorestart": true
 	}]
