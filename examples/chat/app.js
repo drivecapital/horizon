@@ -8,7 +8,12 @@ function uuid() {
 	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 }
 
-var horizon = Horizon();
+var horizon = Horizon({
+	authType: {
+		token: window.authToken,
+		storeLocally: false
+	}
+});
 var horizonMessages = horizon('messages');
 var user = Date.now();
 

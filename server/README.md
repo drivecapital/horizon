@@ -7,38 +7,19 @@
     $ ansible-playbook -i inventory playbook.yml
     ```
 
-1. Open the server's [admin console](http://localhost:8080/rethinkdb-admin/#dataexplorer) (`http://hostname:port/rethinkdb-admin/`).
-1. Set an admin password:
+1. Create the admin token and save it somewhere safe:
 
-    ```js
-    r.db('rethinkdb').table('users').filter({ id: 'admin' }).update({ password: 'myverysecurepassword' })
+    ```sh
+    # Run from /home/horizon/hacknight
+    $ hz make-token admin
     ```
 
-1. Create the `hacknight` database:
+1. Create users:
 
     ```js
-    r.dbCreate('hacknight')
+    horizon('users').store({ id: 'username', groups: ['default', 'authenticated'] });
     ```
 
-1. Add tables:
-
-    ```js
-    r.db('hacknight').tableCreate('answers')
-    r.db('hacknight').tableCreate('messages')
-    r.db('hacknight').tableCreate('questions')
-    r.db('hacknight').tableCreate('scores')
-    ```
-
-1. Add users as necessary:
-
-    ```js
-    r.db('rethinkdb').table('users').insert({
-        id: 'newusername',
-        password: 'newuserpassword'
-    })
-    r.db('hacknight').grant('newusername', { read: false, write: false, config: false })
-    r.db('hacknight').table('answers').grant('newusername', { read: true, write: true })
-    r.db('hacknight').table('messages').grant('newusername', { read: true, write: true })
-    r.db('hacknight').table('questions').grant('newusername', { read: true })
-    r.db('hacknight').table('scores').grant('newusername', { read: true })
+    ```sh
+    $ hz make-token username
     ```
