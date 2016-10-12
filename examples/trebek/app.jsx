@@ -129,6 +129,7 @@ class App extends React.Component {
 					onSelect={this.handleSelect}
 					questionsById={this.state.questionsById}
 				/>
+				<Scores />
 				<Question questionsById={this.state.questionsById} />
 			</div>
 		);
@@ -179,6 +180,58 @@ const Cell = ({ asked, id, onSelect, question }) => (
 		{asked ? NO_BREAK_SPACE : '100'}
 	</td>
 );
+
+class Scores extends React.Component {
+
+	constructor() {
+		super();
+
+		// Set initial state
+		this.state = { scores: [] };
+	}
+
+	componentDidMount() {
+		this.scores = horizon('scores')
+			.watch()
+			.subscribe((scores) => {
+				this.setState({ scores });
+			});
+	}
+
+	componentWillUnmount() {
+		this.scores.unsubscribe();
+	}
+
+	render() {
+		const userScores = this.state.scores.reduce((users, { points, userId }) => ({
+			...users,
+			[userId]: (users[userId] || 0) + points
+		}), {});
+		const sorted = Object.keys(userScores).sort((a, b) =>
+			userScores[a] - userScores[b]
+		);
+
+		return (
+			<table className="Scores">
+				<thead>
+					<tr>
+						{sorted.map((user) =>
+							<th key={user}>{user}</th>
+						)}
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						{sorted.map((user) =>
+							<td key={user}>{userScores[user]}</td>
+						)}
+					</tr>
+				</tbody>
+			</table>
+		);
+	}
+
+}
 
 // Display a question, optionally display the answer, show submissions
 class Question extends React.Component {
