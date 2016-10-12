@@ -7,20 +7,21 @@ const horizon = Horizon({
 	}
 });
 
+const userId = JSON.parse(atob(window.authToken.split('.')[1])).id;
+
 class App extends React.Component {
 
 	constructor() {
 		super();
 
 		// Subscribe to Horizon collections
-		this.answers = horizon('answers');
 		this.questions = horizon('questions');
-		this.scores = horizon('scores');
 
 		// Set initial state
 		this.state = {
 			categories: [],
-			questionsById: {}
+			questionsById: {},
+			selected: null
 		};
 
 		// Bind event handlers
@@ -33,20 +34,41 @@ class App extends React.Component {
 
 	componentWillUnmount() {
 		this.willUnmount = true;
+		this.questions.disconnect();
+	}
+
+	async fetchAllQuestions() {
+		return await (await fetch('/questions.json')).json();
+	}
+
+	fetchAskedQuestions() {
+		return new Promise((resolve, reject) => {
+			this.questions
+				.order('timestamp', 'descending')
+				.fetch()
+				.subscribe(resolve, reject);
+		});
 	}
 
 	async fetchQuestions() {
-		const response = await fetch('/questions.json');
-		const data = await response.json();
+		const [allQuestions, askedQuestions] = await Promise.all([
+			this.fetchAllQuestions(),
+			this.fetchAskedQuestions()
+		]);
 
 		if (!this.willUnmount) {
+			const askedQuestionIds = new Set(askedQuestions.map(({ id }) => id));
+			console.log(askedQuestions);
+			const selected = askedQuestions.length >= 1 ? askedQuestions[0].id : null;
+
 			const questionsById = {};
-			const categories = data.map((category) => ({
+			const categories = allQuestions.map((category) => ({
 				name: category.name,
 				questions: category.questions.map((question) => {
 					questionsById[question.id] = {
 						...question,
-						asked: false
+						asked: askedQuestionIds.has(question.id),
+						category: category.name
 					};
 					return question.id;
 				})
@@ -54,21 +76,34 @@ class App extends React.Component {
 
 			this.setState({
 				categories,
-				questionsById
+				questionsById,
+				selected
 			});
 		}
 	}
 
 	handleSelect(id) {
-		this.setState({
-			questionsById: {
-				...this.state.questionsById,
-				[id]: {
-					...this.state.questionsById[id],
-					asked: true
-				}
-			}
-		});
+		const question = this.state.questionsById[id];
+
+		if (!question.asked) {
+			// Select the question, and remember that it has been asked
+			this.setState({
+				questionsById: {
+					...this.state.questionsById,
+					[id]: {
+						...question,
+						asked: true
+					}
+				},
+				selected: id
+			});
+			this.questions.store({
+				id: question.id,
+				category: question.category,
+				question: question.question,
+				timestamp: new Date()
+			});
+		}
 	}
 
 	render() {
@@ -79,6 +114,12 @@ class App extends React.Component {
 					onSelect={this.handleSelect}
 					questionsById={this.state.questionsById}
 				/>
+				{this.state.selected &&
+					<Question
+						{...this.state.questionsById[this.state.selected]}
+						key={this.state.selected}
+					/>
+				}
 			</div>
 		);
 	}
@@ -125,9 +166,49 @@ const Cells = ({ categories, questionsById, ...props }) => {
 
 const Cell = ({ asked, id, onSelect, question }) => (
 	<td className="Cell" onClick={() => onSelect(id)}>
-		{asked ? question : '?'}
+		{asked ? '' : '100'}
 	</td>
 );
+
+// Display a question, optionally display the answer, show submissions
+class Question extends React.Component {
+
+	constructor() {
+		super();
+
+		// Set initial state
+		this.state = {
+			reveal: false
+		};
+
+		// Bind event handlers
+		this.handleToggleAnswer = this.handleToggleAnswer.bind(this);
+	}
+
+	handleToggleAnswer() {
+		this.setState({
+			reveal: !this.state.reveal
+		});
+	}
+
+	render() {
+		return (
+			<div className="Question">
+				<p>{this.props.category}</p>
+				<p>{this.props.question}</p>
+				{this.state.reveal ? (
+					<p>{this.props.answer}</p>
+				) : (
+					<button onClick={this.handleToggleAnswer}>
+						Show answer
+					</button>
+				)}
+				{/* <Answers questionId={this.props.id} />*/}
+			</div>
+		);
+	}
+
+}
 
 ReactDOM.render(
 	<App />,
