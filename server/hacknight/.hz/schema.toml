@@ -28,7 +28,7 @@ template = "collection('users').find({ id: userId() })"
 [groups.authenticated.rules.list_messages]
 template = "collection('messages')"
 [groups.authenticated.rules.store_messages]
-template = "collection('messages').store({ id: any(), text: any(), timestamp: any(), userId: userId() })"
+template = "collection('messages').store({ id: any(), text: any(), timestamp: any(), user: userId() })"
 
 [groups.authenticated.rules.list_clues]
 template = "collection('clues')"
