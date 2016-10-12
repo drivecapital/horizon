@@ -210,26 +210,18 @@ class Scores extends React.Component {
 			[userId]: (users[userId] || 0) + points
 		}), {});
 		const sorted = Object.keys(userScores).sort((a, b) =>
-			userScores[a] - userScores[b]
+			userScores[b] - userScores[a]
 		);
 
 		return (
-			<table className="Scores">
-				<thead>
-					<tr>
-						{sorted.map((user) =>
-							<th key={user}>{user}</th>
-						)}
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						{sorted.map((user) =>
-							<td key={user}>{userScores[user]}</td>
-						)}
-					</tr>
-				</tbody>
-			</table>
+			<ol className="Scores">
+				{sorted.map((user) =>
+					<li className="Scores-column" key={user}>
+						<div className="Scores-score">{userScores[user]}</div>
+						<div className="Scores-user">{user}</div>
+					</li>
+				)}
+			</ol>
 		);
 	}
 
@@ -283,15 +275,17 @@ class Clue extends React.Component {
 		};
 		return (
 			<div className="Clue">
-				<p>{clue.category}</p>
-				<p>{clue.clue}</p>
-				{this.state.reveal ? (
-					<p>{clue.response}</p>
-				) : (
-					<button onClick={this.handleToggleResponse}>
-						Show answer
-					</button>
-				)}
+				<div className="Clue-clue">
+					<p>{clue.category}</p>
+					<p>{clue.clue}</p>
+					{this.state.reveal ? (
+						<p>{clue.response}</p>
+					) : (
+						<button onClick={this.handleToggleResponse}>
+							Show answer
+						</button>
+					)}
+				</div>
 				<Responses key={clue.id} clueId={clue.id} />
 			</div>
 		);

@@ -15,6 +15,12 @@ html, body, #app {
 	width: 100%;
 }
 
+.App {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
 .Board {
 	background: #000;
 	font-size: 28px;
@@ -38,6 +44,40 @@ html, body, #app {
 	padding: 12px;
 	text-align: center;
 }
+
+.Scores {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.Scores-column {
+	display: flex;
+	flex: 1 0;
+	flex-direction: column;
+	max-width: 100px;
+	padding: 10px;
+}
+
+.Scores-score {
+font-size: 30px;
+	text-align: center;
+}
+
+.Scores-user {
+	font-family: 'Nanum Pen Script', 'Bradley Hand', sans-serif;
+	font-size: 36px;
+	text-align: center;
+}
+
+.Clue-clue {
+	display: none;
+}
+
+.Response { }
 
 .Response-correct,
 .Response-incorrect {
