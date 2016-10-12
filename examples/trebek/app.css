@@ -16,13 +16,54 @@ html, body, #app {
 }
 
 .Board {
+	background: #000;
+	font-size: 28px;
 	table-layout: fixed;
 	width: 100%;
 }
 
-.Cell {
-	background: blue;
+.Board-category {
+	background: #0a1081;
 	color: white;
-	padding: 6px;
+	font-weight: normal;
+	padding: 12px;
+	text-transform: uppercase;
+}
+
+.Cell {
+	background: #0a1081;
+	color: #feab69;
+	font-size: 48px;
+	font-weight: bold;
+	padding: 12px;
 	text-align: center;
+}
+
+.Response-correct,
+.Response-incorrect {
+	background: rgba(0, 0, 0, 0);
+	border: none;
+	cursor: pointer;
+	font-size: 0px;
+	height: 32px;
+	margin: 0;
+	outline: none;
+	padding: 0;
+	width: 32px;
+}
+
+.Response-correct {
+	fill: #080;
+}
+
+.Response-correct:hover {
+	fill: #0c0;
+}
+
+.Response-incorrect {
+	fill: #b00;
+}
+
+.Response-incorrect:hover {
+	fill: #f00;
 }

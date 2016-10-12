@@ -141,10 +141,10 @@ class App extends React.Component {
 
 const Board = ({ categories, ...props }) => (
 	<table className="Board">
-		<thead>
+		<thead className="Board-categories">
 			<tr>
 				{categories.map(({ name }) => (
-					<th key={name}>{name}</th>
+					<th className="Board-category" key={name}>{name}</th>
 				))}
 			</tr>
 		</thead>
@@ -386,10 +386,10 @@ class Responses extends React.Component {
 		);
 
 		return (
-			<ol className="Responses">
-				{scoredResponses.map((response) =>
+			<div className="Responses">
+				{/*scoredResponses.map((response) =>
 					<Response {...response} key={response.id} />
-				)}
+				)*/}
 				{unscoredResponses.slice(0, 1).map((response) =>
 					<Response
 						{...response}
@@ -398,23 +398,45 @@ class Responses extends React.Component {
 						onIncorrect={this.handleIncorrect}
 					/>
 				)}
-			</ol>
+			</div>
 		);
 	}
 
 }
 
 const Response = ({ id, onCorrect, onIncorrect, response, userId }) => (
-	<li className="Response">
-		<span className="Response-user">{userId}</span>
-		<span className="Response-text">{response}</span>
+	<div className="Response">
+		<p className="Response-user">{userId}</p>
+		<p className="Response-text">{response}</p>
 		{onCorrect &&
-			<button onClick={() => onCorrect(id)}>Correct</button>
+			<button className="Response-correct" onClick={() => onCorrect(id)}>
+				<svg
+					x="0px"
+					y="0px"
+					viewBox="0 0 100 100"
+				>
+					{/* Created by Austin Condiff from the Noun Project */}
+					<title>Incorrect</title>
+					<path d="M68.604,36.099L43.513,61.19L32.396,50.073c-0.781-0.781-2.048-0.781-2.828,0  c-0.781,0.781-0.781,2.047,0,2.828l12.531,12.532c0.375,0.375,0.884,0.585,1.414,0.585s1.039-0.21,1.414-0.585l26.506-26.506  c0.781-0.781,0.781-2.047,0-2.828S69.385,35.317,68.604,36.099z" />
+					<path d="M50,8C27.234,8,8,27.233,8,50s19.234,42,42,42s42-19.233,42-42S72.766,8,50,8z M50,88  c-20.598,0-38-17.402-38-38s17.402-38,38-38s38,17.402,38,38S70.598,88,50,88z" />
+				</svg>
+			</button>
 		}
 		{onIncorrect &&
-			<button onClick={() => onIncorrect(id)}>Incorrect</button>
+			<button className="Response-incorrect" onClick={() => onIncorrect(id)}>
+				<svg
+					x="0px"
+					y="0px"
+					viewBox="0 0 100 100"
+				>
+					{/* Created by Austin Condiff from the Noun Project */}
+					<title>Correct</title>
+					<path d="M35.651,66.642c0.512,0,1.024-0.195,1.414-0.585L50.5,52.621l13.435,13.436  c0.39,0.39,0.902,0.585,1.414,0.585s1.024-0.195,1.414-0.585c0.781-0.781,0.781-2.048,0-2.829L53.328,49.793l12.728-12.728  c0.781-0.781,0.781-2.048,0-2.829c-0.78-0.78-2.048-0.78-2.828,0L50.5,46.965L37.772,34.236c-0.78-0.78-2.048-0.78-2.828,0  c-0.781,0.781-0.781,2.048,0,2.829l12.728,12.728L34.237,63.228c-0.781,0.781-0.781,2.048,0,2.829  C34.627,66.447,35.139,66.642,35.651,66.642z" />
+					<path d="M8,50c0,22.767,19.234,42,42,42s42-19.233,42-42S72.766,8,50,8S8,27.233,8,50z M50,12  c20.598,0,38,17.402,38,38S70.598,88,50,88S12,70.598,12,50S29.402,12,50,12z" />
+				</svg>
+			</button>
 		}
-	</li>
+	</div>
 );
 
 ReactDOM.render(
