@@ -14,9 +14,6 @@ class App extends React.Component {
 	constructor() {
 		super();
 
-		// Subscribe to Horizon collections
-		this.questions = horizon('questions');
-
 		// Set initial state
 		this.state = {
 			categories: [],
@@ -33,7 +30,6 @@ class App extends React.Component {
 
 	componentWillUnmount() {
 		this.willUnmount = true;
-		this.questions.disconnect();
 	}
 
 	async fetchAllQuestions() {
@@ -42,7 +38,7 @@ class App extends React.Component {
 
 	fetchAskedQuestions() {
 		return new Promise((resolve, reject) => {
-			this.questions
+			horizon('questions')
 				.order('timestamp', 'descending')
 				.fetch()
 				.subscribe(resolve, reject);
@@ -164,9 +160,6 @@ class Question extends React.Component {
 	constructor() {
 		super();
 
-		// Subscribe to Horizon collections
-		this.questions = horizon('questions');
-
 		// Set initial state
 		this.state = {
 			question: null,
@@ -178,7 +171,7 @@ class Question extends React.Component {
 	}
 
 	componentDidMount() {
-		this.questions
+		this.questions = horizon('questions')
 			.order('timestamp', 'descending')
 			.limit(1)
 			.watch()
@@ -191,7 +184,7 @@ class Question extends React.Component {
 	}
 
 	componentWillUnmount() {
-		this.questions.disconnect();
+		this.questions.unsubscribe();
 	}
 
 	handleToggleAnswer() {

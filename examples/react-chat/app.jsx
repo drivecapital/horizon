@@ -20,9 +20,6 @@ class App extends React.Component {
 	constructor() {
 		super();
 
-		// Subscribe to Horizon collections
-		this.horizon = horizon('messages');
-
 		// Set initial state
 		this.state = { messages: [] };
 
@@ -31,7 +28,7 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-		this.horizon
+		this.horizon = horizon('messages')
 			.order('timestamp', 'descending')
 			.limit(8)
 			.watch()
@@ -41,7 +38,7 @@ class App extends React.Component {
 	}
 
 	componentWillUnmount() {
-		this.horizon.disconnect();
+		this.horizon.unsubscribe();
 	}
 
 	handleSend(message) {
