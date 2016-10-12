@@ -1,5 +1,31 @@
 'use strict';
 
+// Makes a map out of a list given a property name to use as the key
+const mapify = (property, list) => {
+	const map = {};
+	for (const item of list) {
+		map[item[property]] = item;
+	}
+	return map;
+};
+
+const pick = (property) => (object) => object[property];
+
+const split = (predicate, list) => {
+	const left = [];
+	const right = [];
+	for (const item of list) {
+		if (predicate(item)) {
+			left.push(item);
+		} else {
+			right.push(item);
+		}
+	}
+	return [left, right];
+};
+
+const NO_BREAK_SPACE = '\xA0';
+
 const horizon = Horizon({
 	authType: {
 		token: window.authToken,
@@ -86,7 +112,7 @@ class App extends React.Component {
 					}
 				}
 			});
-			this.questions.store({
+			horizon('questions').store({
 				id: question.id,
 				category: question.category,
 				question: question.question,
@@ -150,7 +176,7 @@ const Cells = ({ categories, questionsById, ...props }) => {
 
 const Cell = ({ asked, id, onSelect, question }) => (
 	<td className="Cell" onClick={() => onSelect(id)}>
-		{asked ? '' : '100'}
+		{asked ? NO_BREAK_SPACE : '100'}
 	</td>
 );
 
@@ -211,12 +237,130 @@ class Question extends React.Component {
 						Show answer
 					</button>
 				)}
-				{/* <Answers questionId={question.id} />*/}
+				<Answers key={question.id} questionId={question.id} />
 			</div>
 		);
 	}
 
 }
+
+class Answers extends React.Component {
+
+	constructor() {
+		super();
+
+		// Set initial state
+		this.state = {
+			answers: [],
+			answersById: {},
+			scored: {}
+		};
+
+		// Bind event handlers
+		this.handleCorrect = this.handleCorrect.bind(this);
+		this.handleIncorrect = this.handleIncorrect.bind(this);
+	}
+
+	componentDidMount() {
+		this.answers = horizon('answers')
+			.findAll({ questionId: this.props.questionId })
+			.order('timestamp', 'ascending')
+			.watch()
+			.subscribe((answers) => {
+				this.setState({
+					answers: answers.map(pick('id')),
+					answersById: mapify('id', answers),
+				 });
+			});
+		this.scores = horizon('scores')
+			.watch()
+			.subscribe((scores) => {
+				this.setState({
+					scored: mapify('answerId', scores)
+				});
+			});
+	}
+
+	componentWillUnmount() {
+		this.answers.unsubscribe();
+		this.scores.unsubscribe();
+	}
+
+	handleCorrect(id) {
+		horizon('scores')
+			.store({
+				answerId: id,
+				points: 100,
+				questionId: this.props.questionId,
+				userId: this.state.answersById[id].userId
+			});
+	}
+
+	handleIncorrect(id) {
+		this.setState({
+			scored: {
+				...this.state.scored,
+				[id]: true
+			}
+		});
+		horizon('scores')
+			.store({
+				answerId: id,
+				points: -100,
+				questionId: this.props.questionId,
+				userId: this.state.answersById[id].userId
+			});
+	}
+
+	render() {
+		const answeredUsers = new Set();
+		const allAnswers = this.state.answers
+			.map((id) => this.state.answersById[id])
+			// Only let users submit one answer each
+			.filter(({ userId }) => {
+				if (answeredUsers.has(userId)) {
+					return false;
+				} else {
+					answeredUsers.add(userId);
+					return true;
+				}
+			});
+		const [scoredAnswers, unscoredAnswers] = split(
+			({ id }) => this.state.scored.hasOwnProperty(id),
+			allAnswers
+		);
+
+		return (
+			<ol className="Answers">
+				{scoredAnswers.map((answer) =>
+					<Answer {...answer} key={answer.id} />
+				)}
+				{unscoredAnswers.slice(0, 1).map((answer) =>
+					<Answer
+						{...answer}
+						key={answer.id}
+						onCorrect={this.handleCorrect}
+						onIncorrect={this.handleIncorrect}
+					/>
+				)}
+			</ol>
+		);
+	}
+
+}
+
+const Answer = ({ answer, id, onCorrect, onIncorrect, userId }) => (
+	<li className="Answer">
+		<span className="Answer-user">{userId}</span>
+		<span className="Answer-text">{answer}</span>
+		{onCorrect &&
+			<button onClick={() => onCorrect(id)}>Correct</button>
+		}
+		{onIncorrect &&
+			<button onClick={() => onIncorrect(id)}>Incorrect</button>
+		}
+	</li>
+);
 
 ReactDOM.render(
 	<App />,
