@@ -2,6 +2,8 @@
 
 # Drive Capital Hack Night
 
+## Chat Example
+
 1. Be sure you have [Node.js](https://nodejs.org/en/) installed.
 
     ```sh
@@ -37,3 +39,21 @@
     ```
 
 1. Open [localhost:8000](http://localhost:8000/) and start chatting!
+
+You can run any of the other examples by repeating steps 5 and 6 above for that example.
+
+## Jeopardy!
+
+Your goal is to build the rest of the `jennings` example, named after Ken Jennings. You should be able to read clues from the `clues` collection, and submit your answers to the `responses` collection.
+
+1. Kill the chat server from before.
+
+1. Add your auth token to the `jennings` example as described before.
+
+1. Start the development server and point it at the `jennings` example.
+
+    ```sh
+    $ node run.js jennings
+    ```
+
+There's already a skeleton app in the directory. Information on the data you have access to is included in `jennings/app.js`.
