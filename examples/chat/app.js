@@ -14,8 +14,8 @@ var horizon = Horizon({
 		storeLocally: false
 	}
 });
+var userId = JSON.parse(atob(window.authToken.split('.')[1])).id;
 var horizonMessages = horizon('messages');
-var user = Date.now();
 
 function handleReceiveMessages(messages) {
 	var $messages = document.getElementById('messages');
@@ -51,7 +51,7 @@ function handleSendMessage(event) {
 		id: uuid(),
 		text: text,
 		timestamp: new Date(),
-		user: user
+		user: userId
 	});
 }
 

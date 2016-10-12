@@ -1,10 +1,3 @@
-const horizon = Horizon({
-	authType: {
-		token: window.authToken,
-		storeLocally: false
-	}
-});
-
 const uuid = () => {
 	const s4 = () =>
 		Math.floor((1 + Math.random()) * 0x10000)
@@ -14,21 +7,26 @@ const uuid = () => {
 	return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
 };
 
+const horizon = Horizon({
+	authType: {
+		token: window.authToken,
+		storeLocally: false
+	}
+});
+const userId = JSON.parse(atob(window.authToken.split('.')[1])).id;
+
 class App extends React.Component {
 
 	constructor() {
 		super();
 
-		// Set initial data
+		// Subscribe to Horizon collections
 		this.horizon = horizon('messages');
+
+		// Set initial state
 		this.state = { messages: [] };
-		this.user = Date.now(); // Generate a random ID for the user
 
-		// Cache avatar
-		const avatar = new Image();
-		avatar.src = `http://api.adorable.io/avatars/40/${this.user}.png`;
-
-		// Bind handlers
+		// Bind event handlers
 		this.handleSend = this.handleSend.bind(this);
 	}
 
@@ -51,7 +49,7 @@ class App extends React.Component {
 			id: uuid(),
 			text: message,
 			timestamp: new Date(),
-			user: this.user
+			user: userId
 		});
 	}
 
