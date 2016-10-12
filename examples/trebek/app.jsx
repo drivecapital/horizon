@@ -11,6 +11,8 @@ const mapify = (property, list) => {
 
 const pick = (property) => (object) => object[property];
 
+// Given a predicate, split a list into a left list of items that match the
+// predicate and a right list of items that don't
 const split = (predicate, list) => {
 	const left = [];
 	const right = [];
