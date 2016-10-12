@@ -157,10 +157,14 @@
       synchronize:
         dest: /home/horizon/
         src: hacknight
+      tags:
+        - schema
     - name: Apply horizon schema
       command: hz schema apply --rdb-password {{ admin_password }} .hz/schema.toml
       args:
         chdir: /home/horizon/hacknight
+      tags:
+        - schema
     - name: Install pm2 from npm
       npm:
         global: yes
