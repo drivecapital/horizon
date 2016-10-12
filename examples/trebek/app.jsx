@@ -20,8 +20,7 @@ class App extends React.Component {
 		// Set initial state
 		this.state = {
 			categories: [],
-			questionsById: {},
-			selected: null
+			questionsById: {}
 		};
 
 		// Bind event handlers
@@ -58,9 +57,6 @@ class App extends React.Component {
 
 		if (!this.willUnmount) {
 			const askedQuestionIds = new Set(askedQuestions.map(({ id }) => id));
-			console.log(askedQuestions);
-			const selected = askedQuestions.length >= 1 ? askedQuestions[0].id : null;
-
 			const questionsById = {};
 			const categories = allQuestions.map((category) => ({
 				name: category.name,
@@ -76,8 +72,7 @@ class App extends React.Component {
 
 			this.setState({
 				categories,
-				questionsById,
-				selected
+				questionsById
 			});
 		}
 	}
@@ -86,7 +81,6 @@ class App extends React.Component {
 		const question = this.state.questionsById[id];
 
 		if (!question.asked) {
-			// Select the question, and remember that it has been asked
 			this.setState({
 				questionsById: {
 					...this.state.questionsById,
@@ -94,8 +88,7 @@ class App extends React.Component {
 						...question,
 						asked: true
 					}
-				},
-				selected: id
+				}
 			});
 			this.questions.store({
 				id: question.id,
@@ -114,12 +107,7 @@ class App extends React.Component {
 					onSelect={this.handleSelect}
 					questionsById={this.state.questionsById}
 				/>
-				{this.state.selected &&
-					<Question
-						{...this.state.questionsById[this.state.selected]}
-						key={this.state.selected}
-					/>
-				}
+				<Question questionsById={this.state.questionsById} />
 			</div>
 		);
 	}
@@ -176,13 +164,34 @@ class Question extends React.Component {
 	constructor() {
 		super();
 
+		// Subscribe to Horizon collections
+		this.questions = horizon('questions');
+
 		// Set initial state
 		this.state = {
+			question: null,
 			reveal: false
 		};
 
 		// Bind event handlers
 		this.handleToggleAnswer = this.handleToggleAnswer.bind(this);
+	}
+
+	componentDidMount() {
+		this.questions
+			.order('timestamp', 'descending')
+			.limit(1)
+			.watch()
+			.subscribe(([question]) => {
+				this.setState({
+					question,
+					reveal: false
+				});
+			});
+	}
+
+	componentWillUnmount() {
+		this.questions.disconnect();
 	}
 
 	handleToggleAnswer() {
@@ -192,18 +201,24 @@ class Question extends React.Component {
 	}
 
 	render() {
+		if (!this.state.question) return null;
+
+		const question = {
+			...this.state.question,
+			...this.props.questionsById[this.state.question.id]
+		};
 		return (
 			<div className="Question">
-				<p>{this.props.category}</p>
-				<p>{this.props.question}</p>
+				<p>{question.category}</p>
+				<p>{question.question}</p>
 				{this.state.reveal ? (
-					<p>{this.props.answer}</p>
+					<p>{question.answer}</p>
 				) : (
 					<button onClick={this.handleToggleAnswer}>
 						Show answer
 					</button>
 				)}
-				{/* <Answers questionId={this.props.id} />*/}
+				{/* <Answers questionId={question.id} />*/}
 			</div>
 		);
 	}
