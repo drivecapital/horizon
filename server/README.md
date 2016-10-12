@@ -17,7 +17,12 @@
 1. Create users:
 
     ```js
-    horizon('users').store({ id: 'username', groups: ['default', 'authenticated'] });
+    [/* names */].forEach((id) => {
+        horizon('users').store({
+            id,
+            groups: ['default', 'authenticated']
+        });
+    });
     ```
 
     ```sh
