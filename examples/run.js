@@ -24,7 +24,7 @@ try {
 const app = express();
 const server = http.createServer(app);
 const proxy = httpProxy.createProxyServer({
-	target: 'http://localhost:8080/',
+	target: process.env.HORIZON || 'http://localhost:8080/',
 	ws: true
 });
 
