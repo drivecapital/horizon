@@ -43,7 +43,7 @@ class App extends React.Component {
 		// Set initial state
 		this.state = {
 			categories: [],
-			questionsById: {}
+			cluesById: {}
 		};
 
 		// Bind event handlers
@@ -51,71 +51,71 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-		this.fetchQuestions();
+		this.fetchClues();
 	}
 
 	componentWillUnmount() {
 		this.willUnmount = true;
 	}
 
-	async fetchAllQuestions() {
-		return await (await fetch('/questions.json')).json();
+	async fetchAllClues() {
+		return await (await fetch('/clues.json')).json();
 	}
 
-	fetchAskedQuestions() {
+	fetchAskedClues() {
 		return new Promise((resolve, reject) => {
-			horizon('questions')
+			horizon('clues')
 				.order('timestamp', 'descending')
 				.fetch()
 				.subscribe(resolve, reject);
 		});
 	}
 
-	async fetchQuestions() {
-		const [allQuestions, askedQuestions] = await Promise.all([
-			this.fetchAllQuestions(),
-			this.fetchAskedQuestions()
+	async fetchClues() {
+		const [allClues, askedClues] = await Promise.all([
+			this.fetchAllClues(),
+			this.fetchAskedClues()
 		]);
 
 		if (!this.willUnmount) {
-			const askedQuestionIds = new Set(askedQuestions.map(({ id }) => id));
-			const questionsById = {};
-			const categories = allQuestions.map((category) => ({
+			const askedClueIds = new Set(askedClues.map(({ id }) => id));
+			const cluesById = {};
+			const categories = allClues.map((category) => ({
 				name: category.name,
-				questions: category.questions.map((question) => {
-					questionsById[question.id] = {
-						...question,
-						asked: askedQuestionIds.has(question.id),
+				clues: category.clues.map((clue) => {
+					cluesById[clue.id] = {
+						...clue,
+						asked: askedClueIds.has(clue.id),
 						category: category.name
 					};
-					return question.id;
+					return clue.id;
 				})
 			}));
 
 			this.setState({
 				categories,
-				questionsById
+				cluesById
 			});
 		}
 	}
 
 	handleSelect(id) {
-		const question = this.state.questionsById[id];
+		const clue = this.state.cluesById[id];
 
-		if (!question.asked) {
+		if (!clue.asked) {
 			this.setState({
-				questionsById: {
-					...this.state.questionsById,
+				cluesById: {
+					...this.state.cluesById,
 					[id]: {
-						...question,
+						...clue,
 						asked: true
 					}
 				}
 			});
-			horizon('questions').store({
-				id: question.id,
-				category: question.category,
-				question: question.question,
+			horizon('clues').store({
+				category: clue.category,
+				clue: clue.clue,
+				id: clue.id,
 				timestamp: new Date()
 			});
 		}
@@ -126,11 +126,11 @@ class App extends React.Component {
 			<div className="App">
 				<Board
 					categories={this.state.categories}
+					cluesById={this.state.cluesById}
 					onSelect={this.handleSelect}
-					questionsById={this.state.questionsById}
 				/>
 				<Scores />
-				<Question questionsById={this.state.questionsById} />
+				<Clue cluesById={this.state.cluesById} />
 			</div>
 		);
 	}
@@ -150,12 +150,12 @@ const Board = ({ categories, ...props }) => (
 	</table>
 );
 
-const Cells = ({ categories, questionsById, ...props }) => {
+const Cells = ({ categories, cluesById, ...props }) => {
 	// HTML tables are row-based, so transpose the column-based categories
 	const rows = [];
-	const height = Math.max(...categories.map(({ questions }) => questions.length));
+	const height = Math.max(...categories.map(({ clues }) => clues.length));
 	for (let i = 0; i < height; i++) {
-		rows.push(categories.map(({ questions }) => questions[i]));
+		rows.push(categories.map(({ clues }) => clues[i]));
 	}
 
 	return (
@@ -165,7 +165,7 @@ const Cells = ({ categories, questionsById, ...props }) => {
 					{row.map((qid) => (
 						<Cell
 							{...props}
-							{...questionsById[qid]}
+							{...cluesById[qid]}
 							key={qid}
 						/>
 					))}
@@ -175,7 +175,7 @@ const Cells = ({ categories, questionsById, ...props }) => {
 	);
 };
 
-const Cell = ({ asked, id, onSelect, question }) => (
+const Cell = ({ asked, clue, id, onSelect }) => (
 	<td className="Cell" onClick={() => onSelect(id)}>
 		{asked ? NO_BREAK_SPACE : '100'}
 	</td>
@@ -233,79 +233,79 @@ class Scores extends React.Component {
 
 }
 
-// Display a question, optionally display the answer, show submissions
-class Question extends React.Component {
+// Display a clue, optionally display the correct response, show responses
+class Clue extends React.Component {
 
 	constructor() {
 		super();
 
 		// Set initial state
 		this.state = {
-			question: null,
+			clue: null,
 			reveal: false
 		};
 
 		// Bind event handlers
-		this.handleToggleAnswer = this.handleToggleAnswer.bind(this);
+		this.handleToggleResponse = this.handleToggleResponse.bind(this);
 	}
 
 	componentDidMount() {
-		this.questions = horizon('questions')
+		this.clues = horizon('clues')
 			.order('timestamp', 'descending')
 			.limit(1)
 			.watch()
-			.subscribe(([question]) => {
+			.subscribe(([clue]) => {
 				this.setState({
-					question,
+					clue,
 					reveal: false
 				});
 			});
 	}
 
 	componentWillUnmount() {
-		this.questions.unsubscribe();
+		this.clues.unsubscribe();
 	}
 
-	handleToggleAnswer() {
+	handleToggleResponse() {
 		this.setState({
 			reveal: !this.state.reveal
 		});
 	}
 
 	render() {
-		if (!this.state.question) return null;
+		if (!this.state.clue) return null;
 
-		const question = {
-			...this.state.question,
-			...this.props.questionsById[this.state.question.id]
+		const clue = {
+			...this.state.clue,
+			...this.props.cluesById[this.state.clue.id]
 		};
 		return (
-			<div className="Question">
-				<p>{question.category}</p>
-				<p>{question.question}</p>
+			<div className="Clue">
+				<p>{clue.category}</p>
+				<p>{clue.clue}</p>
 				{this.state.reveal ? (
-					<p>{question.answer}</p>
+					<p>{clue.response}</p>
 				) : (
-					<button onClick={this.handleToggleAnswer}>
+					<button onClick={this.handleToggleResponse}>
 						Show answer
 					</button>
 				)}
-				<Answers key={question.id} questionId={question.id} />
+				<Responses key={clue.id} clueId={clue.id} />
 			</div>
 		);
 	}
 
 }
 
-class Answers extends React.Component {
+class Responses extends React.Component {
 
 	constructor() {
 		super();
 
 		// Set initial state
 		this.state = {
-			answers: [],
-			answersById: {},
+			responses: [],
+			responsesById: {},
 			scored: {}
 		};
 
@@ -315,37 +315,37 @@ class Answers extends React.Component {
 	}
 
 	componentDidMount() {
-		this.answers = horizon('answers')
-			.findAll({ questionId: this.props.questionId })
+		this.responses = horizon('responses')
+			.findAll({ clueId: this.props.clueId })
 			.order('timestamp', 'ascending')
 			.watch()
-			.subscribe((answers) => {
+			.subscribe((responses) => {
 				this.setState({
-					answers: answers.map(pick('id')),
-					answersById: mapify('id', answers),
+					responses: responses.map(pick('id')),
+					responsesById: mapify('id', responses),
 				 });
 			});
 		this.scores = horizon('scores')
 			.watch()
 			.subscribe((scores) => {
 				this.setState({
-					scored: mapify('answerId', scores)
+					scored: mapify('responseId', scores)
 				});
 			});
 	}
 
 	componentWillUnmount() {
-		this.answers.unsubscribe();
+		this.responses.unsubscribe();
 		this.scores.unsubscribe();
 	}
 
 	handleCorrect(id) {
 		horizon('scores')
 			.store({
-				answerId: id,
+				clueId: this.props.clueId,
 				points: 100,
-				questionId: this.props.questionId,
-				userId: this.state.answersById[id].userId
+				responseId: id,
+				userId: this.state.responsesById[id].userId
 			});
 	}
 
@@ -358,40 +358,40 @@ class Answers extends React.Component {
 		});
 		horizon('scores')
 			.store({
-				answerId: id,
+				clueId: this.props.clueId,
 				points: -100,
-				questionId: this.props.questionId,
-				userId: this.state.answersById[id].userId
+				responseId: id,
+				userId: this.state.responsesById[id].userId
 			});
 	}
 
 	render() {
-		const answeredUsers = new Set();
-		const allAnswers = this.state.answers
-			.map((id) => this.state.answersById[id])
-			// Only let users submit one answer each
+		const respondedUsers = new Set();
+		const allResponses = this.state.responses
+			.map((id) => this.state.responsesById[id])
+			// Only let users submit one response each
 			.filter(({ userId }) => {
-				if (answeredUsers.has(userId)) {
+				if (respondedUsers.has(userId)) {
 					return false;
 				} else {
-					answeredUsers.add(userId);
+					respondedUsers.add(userId);
 					return true;
 				}
 			});
-		const [scoredAnswers, unscoredAnswers] = split(
+		const [scoredResponses, unscoredResponses] = split(
 			({ id }) => this.state.scored.hasOwnProperty(id),
-			allAnswers
+			allResponses
 		);
 
 		return (
-			<ol className="Answers">
-				{scoredAnswers.map((answer) =>
-					<Answer {...answer} key={answer.id} />
+			<ol className="Responses">
+				{scoredResponses.map((response) =>
+					<Response {...response} key={response.id} />
 				)}
-				{unscoredAnswers.slice(0, 1).map((answer) =>
-					<Answer
-						{...answer}
-						key={answer.id}
+				{unscoredResponses.slice(0, 1).map((response) =>
+					<Response
+						{...response}
+						key={response.id}
 						onCorrect={this.handleCorrect}
 						onIncorrect={this.handleIncorrect}
 					/>
@@ -402,10 +402,10 @@ class Answers extends React.Component {
 
 }
 
-const Answer = ({ answer, id, onCorrect, onIncorrect, userId }) => (
-	<li className="Answer">
-		<span className="Answer-user">{userId}</span>
-		<span className="Answer-text">{answer}</span>
+const Response = ({ id, onCorrect, onIncorrect, response, userId }) => (
+	<li className="Response">
+		<span className="Response-user">{userId}</span>
+		<span className="Response-text">{response}</span>
 		{onCorrect &&
 			<button onClick={() => onCorrect(id)}>Correct</button>
 		}

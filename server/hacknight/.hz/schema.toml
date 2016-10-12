@@ -1,14 +1,14 @@
-[collections.answers]
-[[collections.answers.indexes]]
-fields = [["questionId"],["timestamp"]]
-
 [collections.messages]
 [[collections.messages.indexes]]
 fields = [["timestamp"]]
 
-[collections.questions]
-[[collections.questions.indexes]]
+[collections.clues]
+[[collections.clues.indexes]]
 fields = [["timestamp"]]
+
+[collections.responses]
+[[collections.responses.indexes]]
+fields = [["clueId"],["timestamp"]]
 
 [collections.scores]
 [[collections.scores.indexes]]
@@ -25,16 +25,14 @@ template = "any()"
 [groups.authenticated.rules.read_current_user]
 template = "collection('users').find({ id: userId() })"
 
-[groups.authenticated.rules.store_answers]
-template = "collection('answers').store({ answer: any(), questionId: any(), timestamp: any(), userId: userId() })"
-
 [groups.authenticated.rules.list_messages]
 template = "collection('messages')"
 [groups.authenticated.rules.store_messages]
 template = "collection('messages').store({ id: any(), text: any(), timestamp: any(), userId: userId() })"
 
-[groups.authenticated.rules.list_questions]
-template = "collection('questions')"
-
+[groups.authenticated.rules.list_clues]
+template = "collection('clues')"
+[groups.authenticated.rules.store_responses]
+template = "collection('responses').store({ response: any(), clueId: any(), timestamp: any(), userId: userId() })"
 [groups.authenticated.rules.list_scores]
 template = "collection('scores')"
